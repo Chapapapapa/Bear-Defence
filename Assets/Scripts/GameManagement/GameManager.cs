@@ -18,17 +18,23 @@ public class GameManager : MonoBehaviour {
 
 
 	[Header("References")]
+	public Transform player;
 	public EnemyArray enemyArray;
+	public Buildings buildings;
 	public GameObject startRoundButton;
 	public Text roundCounter;
 	public Text playerCurrencyText;
+	public GameObject selectionMenu;
 
 	private float enemyCurrentCurrency;
 	private int roundNumber = 0;
 
+	private GameObject selectedBuilding;
 
 	private float timer;
 	private bool roundStarted;
+
+	private bool isPaused = false;
 
 
 	private GameObject[] enemySpawners;
@@ -41,7 +47,10 @@ public class GameManager : MonoBehaviour {
 			Destroy (gameObject);
 		}
 
+
+
 		enemyCurrentCurrency = enemyStartCurrency;
+		selectedBuilding = buildings.buildingsArray [0];
 
 		rand = new System.Random ();
 		enemySpawners = GameObject.FindGameObjectsWithTag ("EnemySpawner");
@@ -50,12 +59,6 @@ public class GameManager : MonoBehaviour {
 
 
 	void Update() {
-		/*timer -= Time.deltaTime;
-		if (timer <= 0f) {
-			SpawnEnemy (enemyArray.enemies[0]);
-			timer = timeBetweenRounds;
-		}*/
-
 		if (roundStarted) {
 			timer -= Time.deltaTime;
 			if (timer <= 0f) {
@@ -70,6 +73,10 @@ public class GameManager : MonoBehaviour {
 		}
 
 		UpdateCurrency ();
+
+		if (Input.GetKeyDown(KeyCode.Tab)) {
+			MenuSelect ();
+		}
 	}
 
 
@@ -95,6 +102,40 @@ public class GameManager : MonoBehaviour {
 
 	public void UpdateCurrency() {
 		playerCurrencyText.text = playerCurrency.ToString();
+	}
+
+
+	//Building
+	public void Build() {
+		float cost = selectedBuilding.GetComponent<PlaceableObject> ().cost;
+		if (playerCurrency - cost >= 0f) {
+			playerCurrency -= cost;
+			Transform holdPosition = player.GetComponent<Player> ().holdPosition;
+			Instantiate (selectedBuilding, holdPosition.position, holdPosition.rotation);
+			Debug.Log ("Built something using Gamemanager");
+		}
+
+	}
+
+	public void ChangeSelectedBuilding(int index) {
+
+	}
+
+	public void UnLockArea() {
+
+	}
+
+
+
+	//UI
+	public void MenuSelect() {
+		isPaused = !isPaused;
+		selectionMenu.SetActive (isPaused);
+		if (isPaused) {
+			Time.timeScale = 0;
+		} else {
+			Time.timeScale = 1;
+		}
 	}
 		
 }
